@@ -1,0 +1,12 @@
+<odoo>
+    <data noupdate="1">
+        <!-- Secuencia para números de viaje -->
+        <record id="seq_viajes" model="ir.sequence">
+            <field name="name">Secuencia de Viajes</field>
+            <field name="code">viajes</field>
+            <field name="prefix">V</field>
+            <field name="padding">8</field>
+            <field name="company_id" eval="False"/>
+        </record>
+    </data>
+</odoo>

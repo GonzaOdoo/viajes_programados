@@ -5,9 +5,47 @@
         <field name="arch" type="xml">
             <form>
                 <header>
-                    <field name="stage_id" widget="statusbar" options="{'clickable': '1'}"/>
+                     <!-- Botón Programar -->
+                    <button name="action_programar" 
+                            type="object" 
+                            string="Confirmar"
+                            class="oe_highlight"
+                            invisible="estado != 'borrador'"/>
+                    
+                    <!-- Botón Preparar -->
+                    <button name="action_preparar" 
+                            type="object" 
+                            string="Iniciar Preparación"
+                            class="oe_highlight"
+                            invisible="estado != 'programado'"/>
+                    
+                    <!-- Botón Iniciar Viaje -->
+                    <button name="action_iniciar_viaje" 
+                            type="object" 
+                            string="Iniciar Viaje"
+                            class="oe_highlight"
+                            invisible="estado != 'preparacion'"/>
+                    
+                    <!-- Botón Finalizar -->
+                    <button name="action_finalizar" 
+                            type="object" 
+                            string="Finalizar Viaje"
+                            class="oe_highlight"
+                            invisible="estado != 'en_viaje'"/>
+                    
+                    <!-- Botón Cancelar -->
+                    <button name="action_cancelar" 
+                            type="object" 
+                            string="Cancelar"
+                            invisible="estado in ['borrador','finalizado','en_viaje']"/>
+                    <field name="estado" widget="statusbar" 
+                           options="{
+                               'clickable': True,
+                               'fold_field': 'kanban_state'
+                           }"/>
                 </header>
                 <sheet string="Viajes">
+                   
                     <field name="kanban_state" widget="state_selection"/>
                     <widget name="web_ribbon" text="Archivado" bg_color="text-bg-danger" invisible="active"/>
                     <field name="active" invisible="1"/>
@@ -18,17 +56,44 @@
                     </div>
                     
                     <group name="group_dates">
+                        <group>
+                            <field name="vehiculo" />
+                            <label for="disponible_m3" string="Disponibilidad de m³:" class="mt-2"/>
+                            <div style="align-self:center !important;"> 
+                                <field name="disponible_m3" readonly="1" class="d-inline"/>
+                                <span> / </span>
+                                <field name="capacidad_m3" readonly="1" class="d-inline"/>
+                                <span>m³</span>
+                            </div>
+                            <label for="disponible_kg" string="Disponibilidad de kg:"/>
+                            <div style="align-content:center !important;">
+                                <field name="disponible_kg" readonly="1" class="d-inline"/>
+                                <span>/</span>
+                                <field name="capacidad_kg" readonly="1" class="d-inline"/>
+                                <span>kg</span>
+                            </div>
+                        </group>
                         <group name="group_dates_left">
-                            <field name="fecha"/>
-                            <field name="fecha_inicio" string="Fechas" widget="daterange" options="{'end_date_field': 'fecha_finalizacion'}"/>
-                            <field name="fecha_finalizacion" invisible="1"/>
+                            <field name="conductor" />
+                            <field name="fecha_inicio" string="Fecha Programada" readonly="estado != 'borrador'"/>
+                            <field name="fecha_finalizacion"/>
                         </group>
 
                     </group>
                     
                     <notebook>
                         <page string="Detalles" name="lines">
-                            <field name="sale_ids"/>
+                            <field name="sale_ids" widget="many2many" domain="[('viaje_id','=',False)]">
+                                <tree>
+                                    <field name="name"/>
+                                    <field name="date_order"/>
+                                    <field name="partner_id"/>
+                                    <field name="amount_total"/>
+                                    <field name="x_studio_total_de_m_1" sum="Total m³" />
+                                    <field name="x_studio_total_de_kg" sum="Total kg"/>
+                                    <field name="invoice_status" widget="badge"/>
+                                </tree>
+                            </field>
                         </page>
                         <page string="Notas" name="notas">
                             <field name="notes" placeholder="Escriba sus notas aquí..." nolabel="1"/>
@@ -43,4 +108,121 @@
             </form>
         </field>
     </record>
+
+    <!-- Vista Tree -->
+    <record id="view_viajes_tree" model="ir.ui.view">
+        <field name="name">viajes.tree</field>
+        <field name="model">viajes</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="name" string="Referencia"/>
+                <field name="conductor" string="Conductor"/>
+                <field name="vehiculo" string="Vehículo"/>
+                <field name="fecha_inicio" string="Fecha inicio"/>
+                <field name="fecha_finalizacion" string="Fecha fin"/>
+                <field name="kanban_state" widget="state_selection" string="Estado"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="view_viajes_kanban" model="ir.ui.view">
+        <field name="name">viajes.kanban</field>
+        <field name="model">viajes</field>
+        <field name="arch" type="xml">
+            <kanban default_group_by="estado" default_order="priority desc, sequence asc, id desc">
+                <field name="priority"/>
+                <field name="sequence"/>
+                <templates>
+                    <t t-name="kanban-box">
+                        <div class="oe_kanban_global_click">
+                            <div class="o_kanban_record_details">
+                                <!-- Cabecera con prioridad por estrellas -->
+                                <div class="o_kanban_record_top">
+                                    
+                                    <div class="o_kanban_record_headings">
+                                        <strong class="o_kanban_record_title">
+                                            <field name="name"/>
+                                        </strong>
+                                    </div>
+                                    <div class="o_dropdown_kanban dropdown">
+                                        <a class="dropdown-toggle o-no-caret btn" data-bs-toggle="dropdown" href="#" aria-label="Menú desplegable">
+                                            <span class="fa fa-ellipsis-v"/>
+                                        </a>
+                                        <div class="dropdown-menu" role="menu">
+                                            <a t-if="widget.editable" type="edit" class="dropdown-item">Editar</a>
+                                            <a t-if="widget.deletable" type="delete" class="dropdown-item">Eliminar</a>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Cuerpo principal -->
+                                <div class="o_kanban_record_body">
+                                    <div class="row">
+                                        <div class="col-6">
+                                            <small class="text-muted">Vehículo:</small>
+                                            <field name="vehiculo" widget="many2one_avatar"/>
+                                        </div>
+                                        <div class="col-6">
+                                            <small class="text-muted">Conductor:</small>
+                                            <field name="conductor" widget="many2one_avatar"/>
+                                        </div>
+                                    </div>
+                                    <div class="row mt-2">
+                                        <div class="col-6">
+                                            <small class="text-muted">Inicio:</small>
+                                            <field name="fecha_inicio" widget="datetime"/>
+                                        </div>
+                                        <div class="col-6">
+                                            <small class="text-muted">Fin:</small>
+                                            <field name="fecha_finalizacion" widget="datetime"/>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Pie de tarjeta -->
+                                <div class="o_kanban_record_bottom">
+                                    <div class="oe_kanban_bottom_left">
+                                        <field name="kanban_state" widget="state_selection"/>
+                                    </div>
+                                    <div class="oe_kanban_bottom_right">
+                                        <field name="priority" widget="priority"/>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </t>
+                </templates>
+                
+                <!-- Estilos CSS personalizados -->
+                <style>
+                    .o_kanban_priority_stars {
+                        display: flex;
+                        margin-right: 8px;
+                    }
+                    .o_kanban_record_top {
+                        display: flex;
+                        align-items: center;
+                    }
+                    .o_kanban_record_headings {
+                        flex-grow: 1;
+                    }
+                </style>
+            </kanban>
+        </field>
+    </record>
+
+    <!-- Acciones -->
+    <record id="action_viajes" model="ir.actions.act_window">
+        <field name="name">Viajes</field>
+        <field name="res_model">viajes</field>
+        <field name="view_mode">kanban,tree,form</field>
+        <field name="context">{'default_state': 'borrador'}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">Crea tu primer viaje</p>
+        </field>
+    </record>
+
+    <!-- Menú -->
+    <menuitem id="menu_viajes_root" name="Viajes" parent="fleet.menu_root" sequence="20" action="action_viajes"/>
+
 </odoo>
