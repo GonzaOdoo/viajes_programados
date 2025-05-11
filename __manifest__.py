@@ -29,4 +29,5 @@
         'views/fleet_vehicle_views.xml',
         'data/secuencia_viajes.xml',
     ],
+    'license':'LGPL-3',
 }
