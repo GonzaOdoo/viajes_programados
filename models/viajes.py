@@ -63,7 +63,7 @@ class Viajes(models.Model):
     # Campos de disponibilidad (readonly)
     capacidad_kg = fields.Float(
         'Capacidad en kg',
-        related='vehiculo.capacidad_m3',
+        related='vehiculo.x_studio_capacidad_de_carga',
     )
     disponible_kg = fields.Float(
         'Capacidad en kg',
@@ -72,7 +72,7 @@ class Viajes(models.Model):
     )
     capacidad_m3 = fields.Float(
         'Capacidad en m³',
-        related='vehiculo.capacidad_kg',
+        related='vehiculo.x_studio_capacidad_volumetrica',
     )
     disponible_m3 = fields.Float(
         'Capacidad en m³',
@@ -146,9 +146,6 @@ class Viajes(models.Model):
                     if not viaje.fecha_inicio and 'fecha_inicio' not in vals:
                         raise UserError("Debe establecer una fecha de inicio antes de cambiar el estado")
             
-            # Preparar fecha_finalizacion para estado finalizado
-            if vals['estado'] == 'finalizado':
-                vals['fecha_finalizacion'] = fields.Datetime.now()
         
         # 2. Escribir los valores (incluyendo los que acabamos de añadir)
         result = super(Viajes, self).write(vals)
@@ -164,11 +161,11 @@ class Viajes(models.Model):
         
         return result
 
-    @api.onchange('estado')
-    def _onchange_estado(self):
-        """Actualiza fecha_finalizacion cuando el estado cambia a 'finalizado'"""
-        if self.estado == 'finalizado':
-            self.fecha_finalizacion = fields.Datetime.now()
+    #@api.onchange('estado')
+    #def _onchange_estado(self):
+    #   """Actualiza fecha_finalizacion cuando el estado cambia a 'finalizado'"""
+    #    if self.estado == 'finalizado':
+    #       self.fecha_finalizacion = fields.Datetime.now()
 
     def action_programar(self):
         for viaje in self:

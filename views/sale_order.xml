@@ -7,7 +7,7 @@
             <field name="arch" type="xml">
                 <xpath expr="//field[@name='partner_shipping_id']" position="after">
                     <field name="viaje_id"/>
-                    <field name="fecha_programada"/>
+                    <!--<field name="fecha_programada"/>-->
                 </xpath>
             </field>
         </record>
