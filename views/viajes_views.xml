@@ -111,13 +111,13 @@
         <field name="name">sale.order.many2many.tree</field>
         <field name="model">sale.order</field>
         <field name="arch" type="xml">
-            <tree>
+            <list>
                 <field name="name"/>
                 <field name="date_order"/>
                 <field name="partner_id"/>
                 <field name="x_studio_total_de_m_1"/>
                 <field name="x_studio_total_de_kg"/>
-            </tree>
+            </list>
         </field>
     </record>
 
@@ -126,14 +126,14 @@
         <field name="name">viajes.tree</field>
         <field name="model">viajes</field>
         <field name="arch" type="xml">
-            <tree>
+            <list>
                 <field name="name" string="Referencia"/>
                 <field name="conductor" string="Conductor"/>
                 <field name="vehiculo" string="Vehículo"/>
                 <field name="fecha_inicio" string="Fecha inicio"/>
                 <field name="fecha_finalizacion" string="Fecha fin"/>
                 <field name="kanban_state" widget="state_selection" string="Estado"/>
-            </tree>
+            </list>
         </field>
     </record>
 
@@ -227,7 +227,7 @@
     <record id="action_viajes" model="ir.actions.act_window">
         <field name="name">Viajes</field>
         <field name="res_model">viajes</field>
-        <field name="view_mode">kanban,tree,form</field>
+        <field name="view_mode">kanban,list,form</field>
         <field name="context">{'default_state': 'borrador'}</field>
         <field name="help" type="html">
             <p class="o_view_nocontent_smiling_face">Crea tu primer viaje</p>
