@@ -97,11 +97,7 @@
                         </page>
                     </notebook>
                 </sheet>
-                <div class="oe_chatter" name="oe_chatter">
-                    <field name="message_follower_ids"/>
-                    <field name="message_ids"/>
-                    <field name="activity_ids"/>
-                </div>
+                <chatter/>
             </form>
         </field>
     </record>
@@ -145,7 +141,7 @@
                 <field name="priority"/>
                 <field name="sequence"/>
                 <templates>
-                    <t t-name="kanban-box">
+                    <t t-name="card">
                         <div class="oe_kanban_global_click">
                             <div class="o_kanban_record_details">
                                 <!-- Cabecera con prioridad por estrellas -->

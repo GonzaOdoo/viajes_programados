@@ -27,8 +27,9 @@ class Viajes(models.Model):
         group_expand='_expand_states'
     )
     
-    def _expand_states(self, states, domain, order):
-        return [key for key, val in type(self).estado.selection]
+    @api.model
+    def _expand_states(self, states, domain):
+        return [key for key, val in self._fields['estado'].selection]
     # Campos básicos
     name = fields.Char(
         string='Referencia de viaje',
@@ -130,11 +131,14 @@ class Viajes(models.Model):
             if viaje.disponible_m3 < 0:
                 viaje.disponible_m3 = 0
                 
-    @api.model
-    def create(self, vals):
-        if vals.get('name', _('Nuevo')) == _('Nuevo'):
-            vals['name'] = self.env['ir.sequence'].next_by_code('viajes') or _('Nuevo')
-        return super(Viajes, self).create(vals)
+    @api.model_create_multi
+    def create(self, vals_list):
+    
+        for vals in vals_list:
+            if vals.get('name', _('Nuevo')) == _('Nuevo'):
+                vals['name'] = self.env['ir.sequence'].next_by_code('viajes') or _('Nuevo')
+    
+        return super().create(vals_list)
         
     def write(self, vals):
         """Sobreescribimos write para actualizar commitment_date en las sale orders"""
